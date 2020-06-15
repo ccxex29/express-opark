@@ -101,18 +101,27 @@ router.get('/check', (req, res) => {
 
 router.post('/book', (req, res) => {
     if (!req.body.email || !req.body.password || !req.body.locationID || !req.body.locationSlotID) {
-        res.status(400).send('Incomplete body');
+        res.status(400).send({
+            code: 'B400_1',
+            message: 'Incomplete body'
+        });
         return;
     }
     const userIndex = userData.findIndex(user => user.email === req.body.email);
     if (userIndex !== -1 && userData[userIndex].password === req.body.password) {
         if (userData[userIndex].bookingStatus.isBooking) {
-            res.status(409).send('User has already booked a parking lot!');
+            res.status(409).send({
+                code: 'B409_2',
+                message: 'User has already booked a parking lot!'
+            });
             return;
         }
     }
     else {
-        res.status(401).send('Permission Denied. User is invalid');
+        res.status(401).send({
+            code: 'B401_1',
+            message: 'Permission Denied. User is invalid'
+        });
         return;
     }
     const locationIndex = locations.findIndex(location => location.locationID === req.body.locationID);
@@ -123,27 +132,46 @@ router.post('/book', (req, res) => {
             userData[userIndex].bookingStatus.isBooking = true;
             userData[userIndex].bookingStatus.bookingLocationId = req.body.locationID;
             userData[userIndex].bookingStatus.bookingLotId = req.body.locationSlotID;
-            res.send('Successful Booking');
+            userData[userIndex].bookingStatus.bookingHistory.push({
+                bookingLocationId: userData[userIndex].bookingStatus.bookingLocationId,
+                bookingLotId: userData[userIndex].bookingStatus.bookingLotId
+            });
+            res.send({
+                code: 'B200_0',
+                message: 'Successful Booking'
+            });
             return;
         }
     }
-    res.status(409).send('Invalid locationID!');
+    res.status(409).send({
+        code: 'B409_1',
+        message: 'Invalid locationID'
+    });
 });
 
 router.post('/checkout', (req, res) => {
     if (!req.body.email || !req.body.password) {
-        res.status(400).send('Incomplete body');
+        res.status(400).send({
+            code: 'B400_1',
+            message: 'Incomplete body'
+        });
         return;
     }
     const userIndex = userData.findIndex(user => user.email === req.body.email);
     if (userIndex !== -1 && userData[userIndex].password === req.body.password){
         if (!userData[userIndex].bookingStatus.isBooking) {
-            res.status(409).send('User has not booked any parking lot');
+            res.status(409).send({
+                code: 'B409_2',
+                message: 'User has not booked any parking lot'
+            });
             return;
         }
     }
     else {
-        res.status(401).send('Permission Denied. User is invalid');
+        res.status(401).send({
+            code: 'B401_1',
+            message: 'Permission Denied. User is invalid'
+        });
         return;
     }
     const locationIndex = locations.findIndex(location => location.locationID === userData[userIndex].bookingStatus.bookingLocationId);
@@ -154,11 +182,17 @@ router.post('/checkout', (req, res) => {
             userData[userIndex].bookingStatus.isBooking = false;
             userData[userIndex].bookingStatus.bookingLocationId = NaN;
             userData[userIndex].bookingStatus.bookingLotId = '';
-            res.send('OK')
+            res.send({
+                code: 'B200_0',
+                message: 'OK'
+            })
             return;
         }
     }
-    res.status(409).send('Invalid locationID!');
+    res.status(409).send({
+        code: 'B409_1',
+        message: 'Invalid locationID'
+    });
 });
 
 

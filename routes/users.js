@@ -5,12 +5,18 @@ const userData = [];
 
 router.get('/', (req, res) => {
     console.log(userData);
-    res.send('OK');
+    res.send({
+      code: 'U200_0',
+      message: 'OK'
+    });
 });
 
 router.post('/register', (req, res) => {
     if (!req.body.fullName || !req.body.email || !req.body.password || !req.body.birthDate || !req.body.displayName) {
-      res.status(400).send('Incomplete body');
+      res.status(400).send({
+        code: 'U400_1',
+        message: 'Incomplete body'
+      });
       return;
     }
   const userIndex = userData.findIndex(user => user.email === req.body.email);
@@ -27,19 +33,26 @@ router.post('/register', (req, res) => {
         bookingLocationId: NaN,
         bookingLotId: '',
         isBooking: false,
-        isParking: false
+        isParking: false,
+        bookingHistory: []
       }
     });
     res.send({
       userID: currentLength
     });
   }
-  res.status(409).send('Email existed');
+  res.status(409).send({
+    code: 'U409_1',
+    message: 'Email existed'
+  });
 });
 
 router.post('/login', (req, res) => {
     if (!req.body.email || !req.body.password) {
-      res.status(400).send('Incomplete body');
+      res.status(400).send({
+        code: 'U400_1',
+        message: 'Incomplete body'
+      });
       return;
     }
     const userIndex = userData.findIndex(user => user.email === req.body.email);
@@ -50,12 +63,18 @@ router.post('/login', (req, res) => {
         displayName: userData[userIndex].displayName,
         birthDate: userData[userIndex].birthDate
       });
-    res.status(401).send('Invalid email or password');
+    res.status(401).send({
+      code: 'U401_1',
+      message: 'Invalid email or password'
+    });
 });
 
 router.post('/checkBooking', (req, res) => {
   if (!req.body.email || !req.body.password) {
-    res.status(400).send('Incomplete body');
+    res.status(400).send({
+      code: 'U400_1',
+      message: 'Incomplete body'
+    });
     return;
   }
   const userIndex = userData.findIndex(user => user.email === req.body.email);
@@ -68,7 +87,10 @@ router.post('/checkBooking', (req, res) => {
         isParking: false
       }
     });
-  res.status(401).send('Invalid email or password');
+  res.status(401).send({
+    code: 'U401_1',
+    message: 'Invalid email or password'
+  });
 })
 
 
